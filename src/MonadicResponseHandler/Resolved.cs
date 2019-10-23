@@ -138,7 +138,7 @@ namespace MonadicResponseHandler
                     if (Value is null)
                     {
                         throw new ArgumentNullException(
-                            message: $"Resolved Value is null. It must be either Ok or Err.",
+                            message: "Resolved Value is null. It must be either Ok or Err.",
                             paramName: nameof(Value));
                     }
                     else
@@ -156,6 +156,72 @@ namespace MonadicResponseHandler
         public static implicit operator Resolved<OkType>(Err value)
         {
             return new Resolved<OkType>(value);
+        }
+    }
+
+    public class Resolved<OkType, ErrType> : BaseResolved
+    {
+        public Resolved(ResolvedType value) : base(value) { }
+
+        public T Match<T>(Func<OkType, T> Ok, Func<ErrType, T> Err)
+        {
+            switch (Value)
+            {
+                case Ok<OkType> ok:
+                    return Ok(ok.Value);
+                case Err<ErrType> err:
+                    return Err(err.Value);
+                default:
+                    if (Value is null)
+                    {
+                        throw new ArgumentNullException(
+                            message: "Resolved Value is null. It must be either Ok or Err.",
+                            paramName: nameof(Value));
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException("Resolved Value could not be casted to Ok or Err type.");
+                    }
+            }
+        }
+
+        public Resolved<T> Match<T>(Func<OkType, Resolved<T>> Ok, Func<ErrType, Resolved<T>> Err)
+        {
+            return Match<Resolved<T>>(Ok, Err);
+        }
+
+        public void Match(Action<OkType> Ok, Action<ErrType> Err)
+        {
+            switch (Value)
+            {
+                case Ok<OkType> ok:
+                    Ok(ok.Value);
+                    break;
+                case Err<ErrType> err:
+                    Err(err.Value);
+                    break;
+                default:
+                    if (Value is null)
+                    {
+                        throw new ArgumentNullException(
+                            message: "Resolved Value is null. It must be either Ok or Err.",
+                            paramName: nameof(Value));
+                    }
+                    else
+                    {
+                        throw new InvalidOperationException("Resolved Value could not be casted to Ok or Err type.");
+                    }
+            }
+        }
+
+        public static implicit operator Resolved<OkType, ErrType>(Ok<OkType> value)
+        {
+            return new Resolved<OkType, ErrType>(value);
+        }
+
+        public static implicit operator Resolved<OkType, ErrType>(Err<ErrType> value)
+        {
+            return new Resolved<OkType, ErrType>(value);
         }
     }
 }

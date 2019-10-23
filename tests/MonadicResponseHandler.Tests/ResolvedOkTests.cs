@@ -20,7 +20,7 @@ namespace MonadicResponseHandler.Tests
         }
 
         [Test]
-        public void SameTypeChainedResolved_ReturnsLastNumberInTheChain()
+        public void SameTypeChainedResolvedOk_ReturnsLastNumberInTheChain()
         {
             Resolved<int> resolved = Resolved.Ok(0);
 
@@ -43,7 +43,7 @@ namespace MonadicResponseHandler.Tests
         }
 
         [Test]
-        public void DifferentTypeChainedResolved_ResolvedValueIsTrue()
+        public void DifferentTypeChainedResolvedOk_ResolvedValueIsTrue()
         {
             Resolved resolved = Resolved.Ok();
 
