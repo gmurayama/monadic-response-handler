@@ -1,9 +1,11 @@
-
+﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.28307.271
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MonadicResponseHandler", "src\MonadicResponseHandler\MonadicResponseHandler.csproj", "{C4A86FC2-9AE8-4454-A6AE-C0B86528482D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MonadicResponseHandler.Tests", "tests\MonadicResponseHandler.Tests\MonadicResponseHandler.Tests.csproj", "{0D0B75AD-8631-406A-AF91-52EDA17F240E}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -15,6 +17,10 @@ Global
 		{C4A86FC2-9AE8-4454-A6AE-C0B86528482D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C4A86FC2-9AE8-4454-A6AE-C0B86528482D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C4A86FC2-9AE8-4454-A6AE-C0B86528482D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0D0B75AD-8631-406A-AF91-52EDA17F240E}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0D0B75AD-8631-406A-AF91-52EDA17F240E}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0D0B75AD-8631-406A-AF91-52EDA17F240E}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0D0B75AD-8631-406A-AF91-52EDA17F240E}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
