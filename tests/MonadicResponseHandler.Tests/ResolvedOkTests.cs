@@ -6,6 +6,20 @@ namespace MonadicResponseHandler.Tests
     public class ResolvedOkTests
     {
         [Test]
+        public void ResolvedOk_IsOkTrue()
+        {
+            Resolved resolved = Resolved.Ok();
+            Assert.IsTrue(resolved.IsOk);
+        }
+
+        [Test]
+        public void ResolvedOk_IsErrFalse()
+        {
+            Resolved resolved = Resolved.Ok();
+            Assert.IsFalse(resolved.IsErr);
+        }
+
+        [Test]
         public void SameTypeChainedResolved_ReturnsLastNumberInTheChain()
         {
             Resolved<int> resolved = Resolved.Ok(0);

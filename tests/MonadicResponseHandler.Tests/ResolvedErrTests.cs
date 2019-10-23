@@ -8,7 +8,7 @@ namespace MonadicResponseHandler.Tests
     public class ResolvedErrTests
     {
         [Test]
-        public void ResolvedErrWithExceptionList_IsErrTrue()
+        public void ResolvedErr_IsErrTrue()
         {
             IEnumerable<Exception> errors = new List<Exception>();
             Resolved resolved = Resolved.Err(errors);
@@ -17,10 +17,11 @@ namespace MonadicResponseHandler.Tests
         }
 
         [Test]
-        public void ResolvedOk_IsErrFalse()
+        public void ResolvedErr_IsOkFalse()
         {
-            Resolved resolved = Resolved.Ok();
-            Assert.IsFalse(resolved.IsErr);
+            IEnumerable<Exception> err = new List<Exception>();
+            Resolved resolved = Resolved.Err(err);
+            Assert.IsFalse(resolved.IsOk);
         }
 
         [Test]
