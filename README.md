@@ -16,7 +16,7 @@ resolved
   );
 ```
 
-The main concept regarding using an object to wrap the function result is to manage not only the expected value but the error case as well. This library gives large flexibility on the value that will be returned, whatever it may be an primitve value, a list, an object or even **nothing at all**!
+The main concept regarding using an object to wrap the function result is to manage not only the expected value but the error case as well. This library gives large flexibility on the value that will be passed through the callback function, whatever it may be an primitive value, a list, an object or even **nothing at all**!
 
 ## How to use it
 
