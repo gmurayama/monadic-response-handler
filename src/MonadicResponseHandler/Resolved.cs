@@ -45,11 +45,6 @@ namespace MonadicResponseHandler
             }
         }
 
-        public Resolved<T> Match<T>(Func<Resolved<T>> Ok, Func<IEnumerable<Exception>, Resolved<T>> Err)
-        {
-            return Match<Resolved<T>>(Ok, Err);
-        }
-
         public void Match(Action Ok, Action<IEnumerable<Exception>> Err)
         {
             switch (Value)
@@ -119,11 +114,6 @@ namespace MonadicResponseHandler
             }
         }
 
-        public Resolved<T> Match<T>(Func<OkType, Resolved<T>> Ok, Func<IEnumerable<Exception>, Resolved<T>> Err)
-        {
-            return Match<Resolved<T>>(Ok, Err);
-        }
-
         public void Match(Action<OkType> Ok, Action<IEnumerable<Exception>> Err)
         {
             switch (Value)
@@ -183,11 +173,6 @@ namespace MonadicResponseHandler
                         throw new InvalidOperationException("Resolved Value could not be casted to Ok or Err type.");
                     }
             }
-        }
-
-        public Resolved<T> Match<T>(Func<OkType, Resolved<T>> Ok, Func<ErrType, Resolved<T>> Err)
-        {
-            return Match<Resolved<T>>(Ok, Err);
         }
 
         public void Match(Action<OkType> Ok, Action<ErrType> Err)
