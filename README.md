@@ -41,10 +41,10 @@ public static void Main(string[] args)
 
     var resolved = BuyTicket(money);
 
-    // Match(Action<Ticket> Ok, Action Err)
+    // string Match(Func<Ticket, string> Ok, Func<IEnumerable<Exception>, string> Err)
     var r = resolved.Match(
-      Ok: (ticket) => $"Ticket #{ticket.Number}",
-      Err: (err) => $"No ticket: {err.First().Message}"
+        Ok: (ticket) => $"Ticket #{ticket.Number}",
+        Err: (err) => $"No ticket: {err.First().Message}"
     );
 
     Console.WriteLine(r);
