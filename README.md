@@ -16,7 +16,7 @@ resolved
   );
 ```
 
-The main concept regarding using an object to wrap the function result is to manage not only the expected value but the error case as well. This library gives large flexibility on the value that will be passed through the callback function, whatever it may be an primitive value, a list, an object or even **nothing at all**!
+The main concept regarding using an object to wrap the function result is to manage not only the expected value but the error case as well. This library gives large flexibility on the value that will be passed through the callback function, whatever it may be a primitive value, a list, an object or even **nothing at all**!
 
 ## How to use it
 
@@ -30,7 +30,7 @@ The main concept regarding using an object to wrap the function result is to man
 | `Err`                       | `Err` (error) struct that holds a value of type `IEnumerable<Exception>` |
 | `Err<T>`                    | `Err` (error) struct that holds a value of type `T`                      |
 
-`Resolved` contains the `Match` function that calls the Ok function (first parameter) or Err function (second parameter) depending on which value is stored. `Match` is overloaded, so it can returns a value of type `T` by using `Match<T>`, a `Resolved` type or it can execute an `Action` that does not returns a value.
+`Resolved` contains the `Match` function that calls the Ok function (first parameter) or Err function (second parameter) depending on which value is stored. `Match` is overloaded, so it can return a value of type `T` by using `Match<T>`, a `Resolved` type or it can execute an `Action` that does not return a value.
 
 ## Examples
 
@@ -41,7 +41,7 @@ public static void Main(string[] args)
 
     var resolved = BuyTicket(money);
 
-    // Match(Action Ok<Ticket>, Action Err)
+    // Match(Action<Ticket> Ok, Action Err)
     var r = resolved.Match(
       Ok: (ticket) => $"Ticket #{ticket.Number}",
       Err: (err) => $"No ticket: {err.First().Message}"
@@ -54,7 +54,7 @@ public static Resolved<Ticket> BuyTicket(decimal money)
 {
     if (money >= 10)
     {
-      return Resolved.Ok(new Ticket());
+        return Resolved.Ok(new Ticket());
     }
     else
     {
