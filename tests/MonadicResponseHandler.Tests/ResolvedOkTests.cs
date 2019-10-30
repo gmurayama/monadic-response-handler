@@ -47,9 +47,10 @@ namespace MonadicResponseHandler.Tests
         }
 
         [Test]
-        public void NestedResolved_ReturnsResolvedOkWithNoValue()
+        public void NestedResolved_ReturnsResolvedOkWithIntValue()
         {
-            Resolved<Resolved<int>> resolved = Resolved.Ok<Resolved<int>>(Resolved.Ok(1));
+            Resolved<int> innerResolved = Resolved.Ok(1);
+            Resolved<Resolved<int>> resolved = Resolved.Ok(innerResolved);
 
             var result = resolved.Match<Resolved<int>>(
                 Ok: (r) =>
@@ -62,6 +63,13 @@ namespace MonadicResponseHandler.Tests
                     return Resolved.Ok(number);
                 },
                 Err: (err) => Resolved.Err(err)
+            );
+
+            Assert.IsTrue(result.IsOk);
+
+            result.Match(
+                Ok: (n) => Assert.AreEqual(1, n),
+                Err: (err) => Assert.Fail("Unexpected error occurred")
             );
         }
 
