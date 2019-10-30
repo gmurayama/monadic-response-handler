@@ -2,6 +2,13 @@
 
   <PropertyGroup>
     <TargetFramework>netcoreapp2.2</TargetFramework>
+    <PackageId>MonadicResponseHandler</PackageId>
+    <Version>1.0.0</Version>
+    <Authors>Gustavo Murayama</Authors>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/gmurayama/monadic-response-handler</RepositoryUrl>
+    <Description>Minimal library that allows a more declarative programming style for handling function results based on two possible states: Ok and Err.</Description>
+    <PackageTags>C# Functional Monad</PackageTags>
   </PropertyGroup>
 
 </Project>
