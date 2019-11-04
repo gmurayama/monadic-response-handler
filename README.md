@@ -6,7 +6,7 @@ To apply other concepts of functional programming to C#, check out [language-ext
 
 ## Getting started
 
-The namespace `MonadicResponseHandler` contains the `Resolved` class that handles two structs, `Ok` and `Err`, each one represeting a possible state that a `Resolved` could have. Mandatorily, it must be provided a callback function for both responses.
+The namespace `MonadicResponseHandler` contains the `Resolved` class that handles two structs, `Ok` and `Err`, each one representing a possible state that a `Resolved` could have. Mandatorily, it must be provided a callback function for both responses.
 
 ```C#
 Resolved resolved = Resolved.Ok("Message in a bottle");
