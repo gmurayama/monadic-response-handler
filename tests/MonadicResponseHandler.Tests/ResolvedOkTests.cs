@@ -6,21 +6,35 @@ namespace MonadicResponseHandler.Tests
     public class ResolvedOkTests
     {
         [Test]
-        public void ResolvedOk_IsOkTrue()
+        public void ResolvedWithEmptyOk_IsOkEqualsTrue()
         {
             Resolved resolved = Resolved.Ok();
             Assert.IsTrue(resolved.IsOk);
         }
 
         [Test]
-        public void ResolvedOk_IsErrFalse()
+        public void ResolvedWithIntegerOk_IsOkEqualsTrue()
+        {
+            Resolved<int> resolved = Resolved.Ok(15);
+            Assert.IsTrue(resolved.IsOk);
+        }
+
+        [Test]
+        public void ResolvedWithEmptyOk_IsErrEqualsFalse()
         {
             Resolved resolved = Resolved.Ok();
             Assert.IsFalse(resolved.IsErr);
         }
 
         [Test]
-        public void Resolved_ReturnsOkWithNoValue()
+        public void ResolvedWithIntegerOk_IsErrEqualsFalse()
+        {
+            Resolved<int> resolved = Resolved.Ok(15);
+            Assert.IsFalse(resolved.IsErr);
+        }
+
+        [Test]
+        public void ResolvedWithEmptyOk_MatchOkAndReturnsEmptyOk()
         {
             Resolved resolved = Resolved.Ok();
 
@@ -34,7 +48,22 @@ namespace MonadicResponseHandler.Tests
         }
 
         [Test]
-        public void ResolvedOkTypeErrType_ReturnsOkWithBoolValue()
+        public void ResolvedWithEmptyOk_MatchOkAndReturnsOkWithIntegerValue()
+        {
+            Resolved resolved = Resolved.Ok();
+
+            var r = resolved.Match<Resolved<int>>(
+                Ok: () => Resolved.Ok(10),
+                Err: (err) => Resolved.Err(err)
+            );
+
+            Assert.IsTrue(r.IsOk);
+            Assert.AreEqual(r.Value.GetType(), typeof(Ok<int>));
+            Assert.AreEqual(10, ((Ok<int>)r.Value).Value);
+        }
+
+        [Test]
+        public void ResolvedWithIntegerOk_ReturnsBoolValueTrue()
         {
             Resolved<int, string> resolved = Resolved.Ok(1);
 
@@ -86,12 +115,16 @@ namespace MonadicResponseHandler.Tests
                 .Match<Resolved<int>>(
                     Ok: (n) => Resolved.Ok(2),
                     Err: (err) => Resolved.Err(err)
+                )
+                .Match<Resolved<int>>(
+                    Ok: (n) => Resolved.Ok(3),
+                    Err: (err) => Resolved.Err(err)
                 );
 
             Assert.IsTrue(r.IsOk);
 
             r.Match(
-                Ok: (n) => { Assert.AreEqual(2, n); },
+                Ok: (n) => { Assert.AreEqual(3, n); },
                 Err: (err) => { Assert.Fail("Unexpected error occurred"); }
             );
         }
