@@ -70,10 +70,12 @@ namespace MonadicResponseHandler
         }
 
         public static Ok Ok() => new Ok();
-        
+
         public static Ok<T> Ok<T>(T value) => new Ok<T>(value);
 
         public static Err Err(IEnumerable<Exception> value) => new Err(value);
+
+        public static Err ErrAsIEnumerable(Exception value) => new Err(new[] { value } as IEnumerable<Exception>);
 
         public static Err<T> Err<T>(T value) => new Err<T>(value);
 
