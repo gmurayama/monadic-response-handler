@@ -1,6 +1,6 @@
 # Monadic Response Handler
 
-Minimal library that allows a more declarative programming style for handling function results based on two possible states: `Ok` and `Err`. Inspired by Rust [std::result](https://doc.rust-lang.org/std/result/).
+Minimal library that allows a more declarative programming style utilizing *Pattern Matching* for handling function results based on two possible states: `Ok` and `Err`. Inspired by Rust [std::result](https://doc.rust-lang.org/std/result/).
 
 To apply other concepts of functional programming to C#, check out [language-ext](https://github.com/louthy/language-ext), a far more complete library for that purpose.
 
