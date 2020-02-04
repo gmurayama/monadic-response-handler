@@ -1,4 +1,4 @@
-name: .NET Core
+name: .NET Core Tests
 
 on: pull_request
 
@@ -9,7 +9,7 @@ jobs:
 
     steps:
     - uses: actions/checkout@v1
-    - name: Test .NET Core
+    - name: Tests
       uses: actions/setup-dotnet@v1
       with:
         dotnet-version: 2.2.108
