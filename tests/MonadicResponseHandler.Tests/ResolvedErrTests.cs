@@ -65,6 +65,22 @@ namespace MonadicResponseHandler.Tests
         }
 
         [Test]
+        public void ResolvedWithDefaultErr_UnwrapValueThrowsException()
+        {
+            Resolved<int> resolved = Resolved.ErrAsIEnumerable(new Exception());
+            Assert.Throws(typeof(InvalidOperationException),
+                          () => resolved.Unwrap());
+        }
+
+        [Test]
+        public void ResolvedWithBoolErr_UnwrapValueThrowsException()
+        {
+            Resolved<int, bool> resolved = Resolved.Err(true);
+            Assert.Throws(typeof(InvalidOperationException),
+                          () => resolved.Unwrap());
+        }
+
+        [Test]
         public void SameTypeChainedResolvedErr_ReturnsLastNumberInTheChain()
         {
             IEnumerable<Exception> errors = new[] { new Exception(), new Exception() };

@@ -76,6 +76,24 @@ namespace MonadicResponseHandler.Tests
         }
 
         [Test]
+        public void ResolvedWithIntegerOk_UnwrapValue()
+        {
+            Resolved<int> resolved = Resolved.Ok(5);
+            var value = resolved.Unwrap();
+
+            Assert.AreEqual(5, value);
+        }
+
+        [Test]
+        public void ResolvedWithOkTypeAndErrType_UnwrapValue()
+        {
+            Resolved<bool, string> resolved = Resolved.Ok(true);
+            var value = resolved.Unwrap();
+
+            Assert.IsTrue(value);
+        }
+
+        [Test]
         public void NestedResolved_ReturnsResolvedOkWithIntValue()
         {
             Resolved<int> innerResolved = Resolved.Ok(1);

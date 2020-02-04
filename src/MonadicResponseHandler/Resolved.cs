@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace MonadicResponseHandler
 {
@@ -140,6 +141,22 @@ namespace MonadicResponseHandler
             }
         }
 
+        public OkType Unwrap()
+        {
+            switch (Value)
+            {
+                case Ok<OkType> ok:
+                    return ok.Value;
+                case Err err:
+                    throw new InvalidOperationException(
+                        $"Invalid attempt to unwrap object of type {typeof(Err)}",
+                        new AggregateException(err.Value)
+                    );
+                default:
+                    throw new InvalidOperationException("Resolved Value could not be casted to Ok or Err type.");
+            }
+        }
+
         public static implicit operator Resolved<OkType>(Ok<OkType> value)
         {
             return new Resolved<OkType>(value);
@@ -199,6 +216,38 @@ namespace MonadicResponseHandler
                         throw new InvalidOperationException("Resolved Value could not be casted to Ok or Err type.");
                     }
             }
+        }
+
+        public OkType Unwrap()
+        {
+            if (Value is Ok<OkType> ok)
+            {
+                return ok.Value;
+            }
+            else if (Value is Err<ErrType> err)
+            {
+                if (typeof(ErrType).IsSubclassOf(typeof(Exception)))
+                {
+                    throw new InvalidOperationException(
+                        $"Invalid attempt to unwrap object of type {typeof(Err<ErrType>)}",
+                        err.Value as Exception
+                    );
+                }
+                else if (typeof(ErrType).IsGenericTypeDefinition &&
+                         typeof(ErrType).GetGenericTypeDefinition() == typeof(IEnumerable<>) &&
+                         typeof(ErrType).GetGenericArguments().Single().IsSubclassOf(typeof(Exception)))
+                {
+                    throw new InvalidOperationException(
+                        $"Invalid attempt to unwrap object of type {typeof(Err<ErrType>)}",
+                        new AggregateException(err.Value as IEnumerable<Exception>)
+                    );
+                }
+
+                throw new InvalidOperationException(
+                    $"Invalid attempt to unwrap object of type {typeof(Err<ErrType>)}");
+            }
+
+            throw new InvalidOperationException("Resolved Value could not be casted to Ok or Err type.");
         }
 
         public static implicit operator Resolved<OkType, ErrType>(Ok<OkType> value)
