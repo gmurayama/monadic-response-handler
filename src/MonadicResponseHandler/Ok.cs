@@ -1,8 +1,8 @@
 ﻿namespace MonadicResponseHandler
 { 
-    public struct Ok : ResolvedType { }
+    public struct Ok { }
 
-    public struct Ok<T> : ResolvedType
+    public struct Ok<T>
     {
         public Ok(T value)
         {

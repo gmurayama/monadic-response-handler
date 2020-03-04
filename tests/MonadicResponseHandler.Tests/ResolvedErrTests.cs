@@ -54,7 +54,7 @@ namespace MonadicResponseHandler.Tests
         [Test]
         public void ResolvedErrWithNullValue_ArgumentNullException()
         {
-            var resolved = new Resolved(null);
+            Resolved resolved = Resolved.Err(null);
 
             Assert.Throws(
                 typeof(ArgumentNullException),

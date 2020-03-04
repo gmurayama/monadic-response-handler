@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace MonadicResponseHandler
 {
-    public struct Err : ResolvedType
+    public struct Err
     {
         public Err(IEnumerable<Exception> value)
         {
@@ -13,7 +13,7 @@ namespace MonadicResponseHandler
         public IEnumerable<Exception> Value { get; }
     }
 
-    public struct Err<T> : ResolvedType
+    public struct Err<T>
     {
         public Err(T value)
         {

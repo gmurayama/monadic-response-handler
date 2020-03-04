@@ -4,71 +4,97 @@ using System.Linq;
 
 namespace MonadicResponseHandler
 {
-    public interface ResolvedType { }
-
-    public abstract class BaseResolved
+    public enum ResolvedType
     {
-        public BaseResolved(ResolvedType value)
-        {
-            Value = value;
-        }
-
-        public ResolvedType Value { get; }
-
-        public bool IsOk => Value.GetType() == typeof(Ok) || Value.GetType().IsGenericType && Value.GetType().GetGenericTypeDefinition() == typeof(Ok<>);
-
-        public bool IsErr => Value.GetType() == typeof(Err) || Value.GetType().IsGenericType && Value.GetType().GetGenericTypeDefinition() == typeof(Err<>);
+        Ok,
+        Err
     }
 
-    public class Resolved : BaseResolved
+    public abstract class BaseResolved<OkType, ErrType>
     {
-        public Resolved(ResolvedType value) : base(value) { }
+        public BaseResolved(OkType value)
+        {
+            OkResult = value;
+            Type = ResolvedType.Ok;
+        }
+
+        public BaseResolved(ErrType value)
+        {
+            ErrResult = value;
+            Type = ResolvedType.Err;
+        }
+
+        public object Value
+        {
+            get
+            {
+                switch (Type)
+                {
+                    case ResolvedType.Ok:
+                        return OkResult;
+                    case ResolvedType.Err:
+                        return ErrResult;
+                    default:
+                        throw new InvalidOperationException("Resolved Value could not be casted to Ok or Err type.");
+                }
+            }
+        }
+
+        protected OkType OkResult { get; }
+
+        protected ErrType ErrResult { get; }
+
+        protected ResolvedType Type { get; }
+
+        public bool IsOk => Type == ResolvedType.Ok;
+
+        public bool IsErr => Type == ResolvedType.Err;
+    }
+
+    public class Resolved : BaseResolved<Ok, Err>
+    {
+        public Resolved() : base(Ok()) { }
+
+        public Resolved(Err err) : base(err) { }
 
         public T Match<T>(Func<T> Ok, Func<IEnumerable<Exception>, T> Err)
         {
-            switch (Value)
+            switch (Type)
             {
-                case Ok ok:
+                case ResolvedType.Ok:
                     return Ok();
-                case Err err:
-                    return Err(err.Value);
-                default:
-                    if (Value is null)
-                    {
+                case ResolvedType.Err:
+                    if (ErrResult.Value == null)
                         throw new ArgumentNullException(
                             message: "Resolved Value is null. It must be either Ok or Err.",
-                            paramName: nameof(Value));
-                    }
+                            paramName: nameof(ErrResult));
                     else
-                    {
-                        throw new InvalidOperationException("Resolved Value could not be casted to Ok or Err type.");
-                    }
+                        return Err(ErrResult.Value);
+                default:
+                    throw new InvalidOperationException("Resolved Value could not be casted to Ok or Err type.");
             }
         }
 
         public void Match(Action Ok, Action<IEnumerable<Exception>> Err)
         {
-            switch (Value)
+            switch (Type)
             {
-                case Ok ok:
+                case ResolvedType.Ok:
                     Ok();
                     break;
-                case Err err:
-                    Err(err.Value);
-                    break;
-                default:
-                    if (Value is null)
-                    {
+                case ResolvedType.Err:
+                    if (ErrResult.Value == null)
                         throw new ArgumentNullException(
                             message: "Resolved Value is null. It must be either Ok or Err.",
-                            paramName: nameof(Value));
-                    }
+                            paramName: nameof(ErrResult));
                     else
-                    {
-                        throw new InvalidOperationException("Resolved Value could not be casted to Ok or Err type.");
-                    }
+                        Err(ErrResult.Value);
+                    break;
+                default:
+                    throw new InvalidOperationException("Resolved Value could not be casted to Ok or Err type.");
             }
         }
+
 
         public static Ok Ok() => new Ok();
 
@@ -82,182 +108,181 @@ namespace MonadicResponseHandler
 
         public static implicit operator Resolved(Ok value)
         {
-            return new Resolved(value);
+            return new Resolved();
         }
 
-        public static implicit operator Resolved(Err value)
+        public static implicit operator Resolved(Err err)
         {
-            return new Resolved(value);
+            return new Resolved(err);
         }
     }
 
-    public class Resolved<OkType> : BaseResolved
+    public class Resolved<OkType> : BaseResolved<Ok<OkType>, Err>
     {
-        public Resolved(ResolvedType value) : base(value) { }
+        public Resolved(Ok<OkType> ok) : base(ok) { }
+
+        public Resolved(Err err) : base(err) { }
 
         public T Match<T>(Func<OkType, T> Ok, Func<IEnumerable<Exception>, T> Err)
         {
-            switch (Value)
+            switch (Type)
             {
-                case Ok<OkType> ok:
-                    return Ok(ok.Value);
-                case Err err:
-                    return Err(err.Value);
-                default:
-                    if (Value is null)
-                    {
+                case ResolvedType.Ok:
+                    if (OkResult.Value == null)
                         throw new ArgumentNullException(
                             message: "Resolved Value is null. It must be either Ok or Err.",
-                            paramName: nameof(Value));
-                    }
+                            paramName: nameof(OkResult));
                     else
-                    {
-                        throw new InvalidOperationException("Resolved Value could not be casted to Ok or Err type.");
-                    }
+                        return Ok(OkResult.Value);
+                case ResolvedType.Err:
+                    if (ErrResult.Value == null)
+                        throw new ArgumentNullException(
+                            message: "Resolved Value is null. It must be either Ok or Err.",
+                            paramName: nameof(ErrResult));
+                    else
+                        return Err(ErrResult.Value);
+                default:
+                    throw new InvalidOperationException("Resolved Value could not be casted to Ok or Err type.");
             }
         }
 
         public void Match(Action<OkType> Ok, Action<IEnumerable<Exception>> Err)
         {
-            switch (Value)
+            switch (Type)
             {
-                case Ok<OkType> ok:
-                    Ok(ok.Value);
-                    break;
-                case Err err:
-                    Err(err.Value);
-                    break;
-                default:
-                    if (Value is null)
-                    {
+                case ResolvedType.Ok:
+                    if (OkResult.Value == null)
                         throw new ArgumentNullException(
                             message: "Resolved Value is null. It must be either Ok or Err.",
-                            paramName: nameof(Value));
-                    }
+                            paramName: nameof(OkResult));
                     else
-                    {
-                        throw new InvalidOperationException("Resolved Value could not be casted to Ok or Err type.");
-                    }
+                        Ok(OkResult.Value);
+                    break;
+                case ResolvedType.Err:
+                    if (ErrResult.Value == null)
+                        throw new ArgumentNullException(
+                            message: "Resolved Value is null. It must be either Ok or Err.",
+                            paramName: nameof(ErrResult));
+                    else
+                        Err(ErrResult.Value);
+                    break;
+                default:
+                    throw new InvalidOperationException("Resolved Value could not be casted to Ok or Err type.");
             }
         }
 
         public OkType Unwrap()
         {
-            switch (Value)
+            switch (Type)
             {
-                case Ok<OkType> ok:
-                    return ok.Value;
-                case Err err:
+                case ResolvedType.Ok:
+                    return OkResult.Value;
+                case ResolvedType.Err:
                     throw new InvalidOperationException(
-                        $"Invalid attempt to unwrap object of type {typeof(Err)}",
-                        new AggregateException(err.Value)
+                        $"Invalid attempt to unwrap object of type {ErrResult.GetType()}",
+                        new AggregateException(ErrResult.Value)
                     );
                 default:
                     throw new InvalidOperationException("Resolved Value could not be casted to Ok or Err type.");
             }
         }
 
-        public static implicit operator Resolved<OkType>(Ok<OkType> value)
+        public static implicit operator Resolved<OkType>(Ok<OkType> ok)
         {
-            return new Resolved<OkType>(value);
+            return new Resolved<OkType>(ok);
         }
 
-        public static implicit operator Resolved<OkType>(Err value)
+        public static implicit operator Resolved<OkType>(Err err)
         {
-            return new Resolved<OkType>(value);
+            return new Resolved<OkType>(err);
         }
     }
 
-    public class Resolved<OkType, ErrType> : BaseResolved
+    public class Resolved<OkType, ErrType> : BaseResolved<Ok<OkType>, Err<ErrType>>
     {
-        public Resolved(ResolvedType value) : base(value) { }
+        public Resolved(Ok<OkType> ok) : base(ok) { }
+
+        public Resolved(Err<ErrType> err) : base(err) { }
 
         public T Match<T>(Func<OkType, T> Ok, Func<ErrType, T> Err)
         {
-            switch (Value)
+            switch (Type)
             {
-                case Ok<OkType> ok:
-                    return Ok(ok.Value);
-                case Err<ErrType> err:
-                    return Err(err.Value);
-                default:
-                    if (Value is null)
-                    {
+                case ResolvedType.Ok:
+                    if (OkResult.Value == null)
                         throw new ArgumentNullException(
                             message: "Resolved Value is null. It must be either Ok or Err.",
-                            paramName: nameof(Value));
-                    }
+                            paramName: nameof(OkResult));
                     else
-                    {
-                        throw new InvalidOperationException("Resolved Value could not be casted to Ok or Err type.");
-                    }
+                        return Ok(OkResult.Value);
+                case ResolvedType.Err:
+                    if (ErrResult.Value == null)
+                        throw new ArgumentNullException(
+                            message: "Resolved Value is null. It must be either Ok or Err.",
+                            paramName: nameof(ErrResult));
+                    else
+                        return Err(ErrResult.Value);
+                default:
+                    throw new InvalidOperationException("Resolved Value could not be casted to Ok or Err type.");
             }
         }
 
         public void Match(Action<OkType> Ok, Action<ErrType> Err)
         {
-            switch (Value)
+            switch (Type)
             {
-                case Ok<OkType> ok:
-                    Ok(ok.Value);
-                    break;
-                case Err<ErrType> err:
-                    Err(err.Value);
-                    break;
-                default:
-                    if (Value is null)
-                    {
+                case ResolvedType.Ok:
+                    if (OkResult.Value == null)
                         throw new ArgumentNullException(
                             message: "Resolved Value is null. It must be either Ok or Err.",
-                            paramName: nameof(Value));
-                    }
+                            paramName: nameof(OkResult));
                     else
-                    {
-                        throw new InvalidOperationException("Resolved Value could not be casted to Ok or Err type.");
-                    }
+                        Ok(OkResult.Value);
+                    break;
+                case ResolvedType.Err:
+                    if (ErrResult.Value == null)
+                        throw new ArgumentNullException(
+                            message: "Resolved Value is null. It must be either Ok or Err.",
+                            paramName: nameof(ErrResult));
+                    else
+                        Err(ErrResult.Value);
+                    break;
+                default:
+                    throw new InvalidOperationException("Resolved Value could not be casted to Ok or Err type.");
             }
         }
 
         public OkType Unwrap()
         {
-            if (Value is Ok<OkType> ok)
+            switch (Type)
             {
-                return ok.Value;
+                case ResolvedType.Ok:
+                    return OkResult.Value;
+                case ResolvedType.Err:
+                    if (typeof(ErrType).IsGenericTypeDefinition &&
+                        typeof(ErrType).GetGenericTypeDefinition() == typeof(IEnumerable<>) &&
+                        typeof(ErrType).GetGenericArguments().Single().IsSubclassOf(typeof(Exception)))
+                        throw new InvalidOperationException(
+                            $"Invalid attempt to unwrap object of type {ErrResult.GetType()}",
+                            new AggregateException(ErrResult.Value as IEnumerable<Exception>)
+                        );
+                    else
+                        throw new InvalidOperationException(
+                            $"Invalid attempt to unwrap object of type {typeof(ErrType)}"
+                        );
+                default:
+                    throw new InvalidOperationException("Resolved Value could not be casted to Ok or Err type.");
             }
-            else if (Value is Err<ErrType> err)
-            {
-                if (typeof(ErrType).IsSubclassOf(typeof(Exception)))
-                {
-                    throw new InvalidOperationException(
-                        $"Invalid attempt to unwrap object of type {typeof(Err<ErrType>)}",
-                        err.Value as Exception
-                    );
-                }
-                else if (typeof(ErrType).IsGenericTypeDefinition &&
-                         typeof(ErrType).GetGenericTypeDefinition() == typeof(IEnumerable<>) &&
-                         typeof(ErrType).GetGenericArguments().Single().IsSubclassOf(typeof(Exception)))
-                {
-                    throw new InvalidOperationException(
-                        $"Invalid attempt to unwrap object of type {typeof(Err<ErrType>)}",
-                        new AggregateException(err.Value as IEnumerable<Exception>)
-                    );
-                }
-
-                throw new InvalidOperationException(
-                    $"Invalid attempt to unwrap object of type {typeof(Err<ErrType>)}");
-            }
-
-            throw new InvalidOperationException("Resolved Value could not be casted to Ok or Err type.");
         }
 
-        public static implicit operator Resolved<OkType, ErrType>(Ok<OkType> value)
+        public static implicit operator Resolved<OkType, ErrType>(Ok<OkType> ok)
         {
-            return new Resolved<OkType, ErrType>(value);
+            return new Resolved<OkType, ErrType>(ok);
         }
 
-        public static implicit operator Resolved<OkType, ErrType>(Err<ErrType> value)
+        public static implicit operator Resolved<OkType, ErrType>(Err<ErrType> err)
         {
-            return new Resolved<OkType, ErrType>(value);
+            return new Resolved<OkType, ErrType>(err);
         }
     }
 }
