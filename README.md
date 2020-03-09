@@ -9,7 +9,7 @@ To apply other concepts of functional programming to C#, check out [language-ext
 The namespace `MonadicResponseHandler` contains the `Resolved` class that handles two structs, `Ok` and `Err`, each one representing a possible state that a `Resolved` could have. Mandatorily, it must be provided a callback function for both responses.
 
 ```C#
-Resolved resolved = Resolved.Ok("Message in a bottle");
+Resolved<string> resolved = Resolved.Ok("Message in a bottle");
 
 resolved
   .Match(
@@ -32,7 +32,9 @@ The main concept regarding using an object to wrap the function result is to man
 | `Err`                       | `Err` (error) struct that holds a value of type `IEnumerable<Exception>` |
 | `Err<T>`                    | `Err` (error) struct that holds a value of type `T`                      |
 
-`Resolved` contains the `Match` function that calls the Ok function (first parameter) or Err function (second parameter) depending on which value is stored. `Match` is overloaded, so it can return a value of type `T` by using `Match<T>`, a `Resolved` type or it can execute an `Action` that does not return a value.
+`Resolved` contains the `Match` function that calls the Ok function (first parameter) or Err function (second parameter) depending on which value is stored. `Match` is overloaded, so it can return a `Resolved` type for instance, a value of type `T` by using `Match<T>` or it can execute an `Action` that does not return a value.
+
+It is possible to unwrap a `Resolved` using the function `Unwrap()` to force the stored value to be retrieved. However, it is **not** recommended due to trying to unwrap an Err value will throw an `Exception`.
 
 ## Examples
 
