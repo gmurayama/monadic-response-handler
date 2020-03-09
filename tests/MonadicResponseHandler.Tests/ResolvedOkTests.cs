@@ -1,4 +1,6 @@
 ﻿using NUnit.Framework;
+using System;
+using System.Linq;
 
 namespace MonadicResponseHandler.Tests
 {
@@ -91,7 +93,7 @@ namespace MonadicResponseHandler.Tests
             var value = resolved.Unwrap();
 
             Assert.IsTrue(value);
-        }
+        }        
 
         [Test]
         public void NestedResolved_ReturnsResolvedOkWithIntValue()

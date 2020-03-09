@@ -81,6 +81,91 @@ namespace MonadicResponseHandler.Tests
         }
 
         [Test]
+        public void ResolvedWithDefaultErr_ForwardErrThroughTheChain()
+        {
+            string errorMessage = "Forwarded Err";
+            Resolved resolved = Resolved.ErrAsIEnumerable(new Exception(errorMessage));
+
+            var result = resolved
+                .Match(
+                    Ok: () => Resolved.Ok(),
+                    Err: Behavior.Forward
+                )
+                .Match(
+                    Ok: () => Resolved.Ok(),
+                    Err: Behavior.Forward
+                )
+                .Match<int>(
+                    Ok: () => Resolved.Ok(1),
+                    Err: Behavior.Forward
+                );
+
+            Assert.AreEqual(typeof(Err), result.Value.GetType());
+
+            var err = (Err)result.Value;
+
+            Assert.AreEqual(err.Value.First().Message, errorMessage);
+        }
+
+        [Test]
+        public void ResolvedWithDefaultErrAndIntegerOk_ForwardErrThroughTheChain()
+        {
+            string errorMessage = "Forwarded Err";
+            Resolved<int> resolved = Resolved.ErrAsIEnumerable(new Exception(errorMessage));
+
+            var result = resolved
+                .Match(
+                    Ok: (innerValue) => Resolved.Ok(1),
+                    Err: Behavior.Forward
+                )
+                .Match<int>(
+                    Ok: (innerValue) => Resolved.Ok(2),
+                    Err: Behavior.Forward
+                )
+                .Match(
+                    Ok: (innerValue) => Resolved.Ok(),
+                    Err: Behavior.Forward
+                );
+
+            Assert.AreEqual(typeof(Err), result.Value.GetType());
+
+            var err = (Err)result.Value;
+
+            Assert.AreEqual(err.Value.First().Message, errorMessage);
+        }
+
+        [Test]
+        public void ResolvedWithStringErr_ForwardErrThroughTheChain()
+        {
+            string errorMessage = "Forwarded Err";
+            Resolved<string, string> resolved = Resolved.Err(errorMessage);
+
+            var result = resolved
+                .Match<int>(
+                    Ok: (innerValue) => Resolved.Ok(1),
+                    Err: Behavior.Forward
+                )
+                .Match<bool>(
+                    Ok: (innerValue) => Resolved.Ok(true),
+                    Err: Behavior.Forward
+                )
+                .Match<char>(
+                    Ok: (innerValue) => Resolved.Ok('\a'),
+                    Err: Behavior.Forward
+                )
+                .Match(
+                    Ok: (innerValue) => Resolved.Ok('\b'),
+                    Err: Behavior.Forward
+                );
+
+            Assert.AreEqual(typeof(Err<string>), result.Value.GetType());
+
+            var err = (Err<string>)result.Value;
+
+            Assert.AreEqual(err.Value, errorMessage);
+        }
+
+        [Test]
         public void SameTypeChainedResolvedErr_ReturnsLastNumberInTheChain()
         {
             IEnumerable<Exception> errors = new[] { new Exception(), new Exception() };

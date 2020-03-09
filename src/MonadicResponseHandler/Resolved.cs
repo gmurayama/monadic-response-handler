@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
@@ -8,6 +8,12 @@ namespace MonadicResponseHandler
     {
         Ok,
         Err
+    }
+
+    public enum Behavior
+    {
+        Forward,
+        ThrowEx
     }
 
     public abstract class BaseResolved<OkType, ErrType>
@@ -75,6 +81,48 @@ namespace MonadicResponseHandler
             }
         }
 
+        public Resolved Match(Func<Resolved> Ok, Behavior Err)
+        {
+            switch (Type)
+            {
+                case ResolvedType.Ok:
+                    return Ok();
+                case ResolvedType.Err:
+                    switch (Err)
+                    {
+                        case Behavior.Forward:
+                            return ErrResult;
+                        case Behavior.ThrowEx:
+                            throw new InvalidOperationException("Resolved Value was an Err and expected an Ok value. The setted behavior was to throw an Exception.");
+                        default:
+                            throw new InvalidOperationException($"Unexpected Behavior: {Err.GetType()} {Err}");
+                    }
+                default:
+                    throw new InvalidOperationException("Resolved Value could not be casted to Ok or Err type.");
+            }
+        }
+
+        public Resolved<T> Match<T>(Func<Resolved<T>> Ok, Behavior Err)
+        {
+            switch (Type)
+            {
+                case ResolvedType.Ok:
+                    return Ok();
+                case ResolvedType.Err:
+                    switch (Err)
+                    {
+                        case Behavior.Forward:
+                            return ErrResult;
+                        case Behavior.ThrowEx:
+                            throw new InvalidOperationException("Resolved Value was an Err and expected an Ok value. The setted behavior was to throw an Exception.");
+                        default:
+                            throw new InvalidOperationException($"Unexpected Behavior: {Err.GetType()} {Err}");
+                    }
+                default:
+                    throw new InvalidOperationException("Resolved Value could not be casted to Ok or Err type.");
+            }
+        }
+
         public void Match(Action Ok, Action<IEnumerable<Exception>> Err)
         {
             switch (Type)
@@ -94,7 +142,6 @@ namespace MonadicResponseHandler
                     throw new InvalidOperationException("Resolved Value could not be casted to Ok or Err type.");
             }
         }
-
 
         public static Ok Ok() => new Ok();
 
@@ -141,6 +188,69 @@ namespace MonadicResponseHandler
                             paramName: nameof(ErrResult));
                     else
                         return Err(ErrResult.Value);
+                default:
+                    throw new InvalidOperationException("Resolved Value could not be casted to Ok or Err type.");
+            }
+        }
+
+        public Resolved Match(Func<OkType, Resolved> Ok, Behavior Err)
+        {
+            switch (Type)
+            {
+                case ResolvedType.Ok:
+                    return Ok(OkResult.Value);
+                case ResolvedType.Err:
+                    switch (Err)
+                    {
+                        case Behavior.Forward:
+                            return ErrResult;
+                        case Behavior.ThrowEx:
+                            throw new InvalidOperationException("Resolved Value was an Err and expected an Ok value. The setted behavior was to throw an Exception.");
+                        default:
+                            throw new InvalidOperationException($"Unexpected Behavior: {Err.GetType()} {Err}");
+                    }
+                default:
+                    throw new InvalidOperationException("Resolved Value could not be casted to Ok or Err type.");
+            }
+        }
+
+        public Resolved<OkType> Match(Func<OkType, Resolved<OkType>> Ok, Behavior Err)
+        {
+            switch (Type)
+            {
+                case ResolvedType.Ok:
+                    return Ok(OkResult.Value);
+                case ResolvedType.Err:
+                    switch (Err)
+                    {
+                        case Behavior.Forward:
+                            return ErrResult;
+                        case Behavior.ThrowEx:
+                            throw new InvalidOperationException("Resolved Value was an Err and expected an Ok value. The setted behavior was to throw an Exception.");
+                        default:
+                            throw new InvalidOperationException($"Unexpected Behavior: {Err.GetType()} {Err}");
+                    }
+                default:
+                    throw new InvalidOperationException("Resolved Value could not be casted to Ok or Err type.");
+            }
+        }
+
+        public Resolved<T> Match<T>(Func<OkType, Resolved<T>> Ok, Behavior Err)
+        {
+            switch (Type)
+            {
+                case ResolvedType.Ok:
+                    return Ok(OkResult.Value);
+                case ResolvedType.Err:
+                    switch (Err)
+                    {
+                        case Behavior.Forward:
+                            return ErrResult;
+                        case Behavior.ThrowEx:
+                            throw new InvalidOperationException("Resolved Value was an Err and expected an Ok value. The setted behavior was to throw an Exception.");
+                        default:
+                            throw new InvalidOperationException($"Unexpected Behavior: {Err.GetType()} {Err}");
+                    }
                 default:
                     throw new InvalidOperationException("Resolved Value could not be casted to Ok or Err type.");
             }
@@ -222,6 +332,48 @@ namespace MonadicResponseHandler
                             paramName: nameof(ErrResult));
                     else
                         return Err(ErrResult.Value);
+                default:
+                    throw new InvalidOperationException("Resolved Value could not be casted to Ok or Err type.");
+            }
+        }
+
+        public Resolved<OkType, ErrType> Match(Func<OkType, Resolved<OkType, ErrType>> Ok, Behavior Err)
+        {
+            switch (Type)
+            {
+                case ResolvedType.Ok:
+                    return Ok(OkResult.Value);
+                case ResolvedType.Err:
+                    switch (Err)
+                    {
+                        case Behavior.Forward:
+                            return ErrResult;
+                        case Behavior.ThrowEx:
+                            throw new InvalidOperationException("Resolved Value was an Err and expected an Ok value. The setted behavior was to throw an Exception.");
+                        default:
+                            throw new InvalidOperationException($"Unexpected Behavior: {Err.GetType()} {Err}");
+                    }
+                default:
+                    throw new InvalidOperationException("Resolved Value could not be casted to Ok or Err type.");
+            }
+        }
+
+        public Resolved<T, ErrType> Match<T>(Func<OkType, Resolved<T, ErrType>> Ok, Behavior Err)
+        {
+            switch (Type)
+            {
+                case ResolvedType.Ok:
+                    return Ok(OkResult.Value);
+                case ResolvedType.Err:
+                    switch (Err)
+                    {
+                        case Behavior.Forward:
+                            return ErrResult;
+                        case Behavior.ThrowEx:
+                            throw new InvalidOperationException("Resolved Value was an Err and expected an Ok value. The setted behavior was to throw an Exception.");
+                        default:
+                            throw new InvalidOperationException($"Unexpected Behavior: {Err.GetType()} {Err}");
+                    }
                 default:
                     throw new InvalidOperationException("Resolved Value could not be casted to Ok or Err type.");
             }
