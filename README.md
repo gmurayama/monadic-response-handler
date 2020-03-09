@@ -34,7 +34,9 @@ The main concept regarding using an object to wrap the function result is to man
 
 `Resolved` contains the `Match` function that calls the Ok function (first parameter) or Err function (second parameter) depending on which value is stored. `Match` is overloaded, so it can return a `Resolved` type for instance, a value of type `T` by using `Match<T>` or it can execute an `Action` that does not return a value.
 
-It is possible to unwrap a `Resolved` using the function `Unwrap()` to force the stored value to be retrieved. However, it is **not** recommended due to trying to unwrap an Err value will throw an `Exception`.
+For convenience, a `Behavior` can be provided in the `Err` parameter to either just return the stored `Err` value (`Behavior.Forward`) or to throw an exception (`Behavior.ThrowEx`).
+
+It is also possible to unwrap a `Resolved` using the function `Unwrap()` to force the stored value to be retrieved. However, it is **not** recommended due to trying to unwrap an Err value will throw an `Exception`.
 
 ## Examples
 
