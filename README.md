@@ -97,3 +97,6 @@ public static Resolved AddCustomer(Customer customer)
     }
 }
 ```
+
+* [Chained Resolved with Behavior.Forward on Err](https://github.com/gmurayama/monadic-response-handler/blob/35be1c6ffd1f07879a4ad2727c0cf9636d0ef345/tests/MonadicResponseHandler.Tests/ResolvedErrTests.cs#L83-L108)
+* [Unwrap Resolved with Ok value](https://github.com/gmurayama/monadic-response-handler/blob/35be1c6ffd1f07879a4ad2727c0cf9636d0ef345/tests/MonadicResponseHandler.Tests/ResolvedOkTests.cs#L80-L87)
