@@ -4,12 +4,18 @@ using System.Linq;
 
 namespace MonadicResponseHandler
 {
+    /// <summary>
+    /// Specifies the Resolved internal state based on it's stored value
+    /// </summary>
     public enum ResolvedType
     {
         Ok,
         Err
     }
 
+    /// <summary>
+    /// Set of behaviors available in Err handling
+    /// </summary>
     public enum Behavior
     {
         Forward,
@@ -30,6 +36,9 @@ namespace MonadicResponseHandler
             Type = ResolvedType.Err;
         }
 
+        /// <summary>
+        /// Resolved Value
+        /// </summary>
         public object Value
         {
             get
@@ -52,8 +61,14 @@ namespace MonadicResponseHandler
 
         protected ResolvedType Type { get; }
 
+        /// <summary>
+        /// Evaluate if stored value is an Ok state
+        /// </summary>
         public bool IsOk => Type == ResolvedType.Ok;
 
+        /// <summary>
+        /// Evaluate if stored value is an Err state
+        /// </summary>
         public bool IsErr => Type == ResolvedType.Err;
     }
 
@@ -63,6 +78,13 @@ namespace MonadicResponseHandler
 
         public Resolved(Err err) : base(err) { }
 
+        /// <summary>
+        /// Execute one of the two functions provided based on the value stored and return a value of type T
+        /// </summary>
+        /// <typeparam name="T">The return type for both functions</typeparam>
+        /// <param name="Ok">Function to be executed that returns a value of type T if the value stored is an Ok</param>
+        /// <param name="Err">Function to be executed if the value stored is an Err that receives its stored value and returns a value of type T</param>
+        /// <returns>A value of type T</returns>
         public T Match<T>(Func<T> Ok, Func<IEnumerable<Exception>, T> Err)
         {
             switch (Type)
@@ -81,6 +103,12 @@ namespace MonadicResponseHandler
             }
         }
 
+        /// <summary>
+        /// Execute a function that returns a Resolved value if the stored value is an Ok, otherwise execute a pre defined behavior
+        /// </summary>
+        /// <param name="Ok">Function to be executed that returns a Resolved if the value stored is an Ok</param>
+        /// <param name="Err">A pre defined behaviors to occur if the stored value is an Err</param>
+        /// <returns>Resolved value</returns>
         public Resolved Match(Func<Resolved> Ok, Behavior Err)
         {
             switch (Type)
@@ -93,7 +121,7 @@ namespace MonadicResponseHandler
                         case Behavior.Forward:
                             return ErrResult;
                         case Behavior.ThrowEx:
-                            throw new InvalidOperationException("Resolved Value was an Err and expected an Ok value. The setted behavior was to throw an Exception.");
+                            throw new AggregateException("Resolved Value was an Err and expected an Ok value. The setted behavior was to throw an Exception.", ErrResult.Value);
                         default:
                             throw new InvalidOperationException($"Unexpected Behavior: {Err.GetType()} {Err}");
                     }
@@ -102,6 +130,13 @@ namespace MonadicResponseHandler
             }
         }
 
+        /// <summary>
+        /// Execute a function that returns a Resolved value if the stored value is an Ok, otherwise execute a pre defined behavior
+        /// </summary>
+        /// <typeparam name="T">Generic Type for OkType in Resolved</typeparam>
+        /// <param name="Ok">Function to be executed that returns a Resolved&lt;T&gt; if the value stored is an Ok</param>
+        /// <param name="Err">A pre defined behaviors to occur if the stored value is an Err</param>
+        /// <returns>Resolved&lt;T&gt; value</returns>
         public Resolved<T> Match<T>(Func<Resolved<T>> Ok, Behavior Err)
         {
             switch (Type)
@@ -123,6 +158,11 @@ namespace MonadicResponseHandler
             }
         }
 
+        /// <summary>
+        /// Execute one of the two functions provided based on the value stored
+        /// </summary>
+        /// <param name="Ok">Function to be executed if the value stored is an Ok</param>
+        /// <param name="Err">Function to be executed if the value stored is an Err that receives its stored value as a parameter</param>
         public void Match(Action Ok, Action<IEnumerable<Exception>> Err)
         {
             switch (Type)
@@ -143,14 +183,40 @@ namespace MonadicResponseHandler
             }
         }
 
+        /// <summary>
+        /// Creates an Ok
+        /// </summary>
+        /// <returns>Ok struct</returns>
         public static Ok Ok() => new Ok();
 
+        /// <summary>
+        /// Creates an Ok<T>
+        /// </summary>
+        /// <typeparam name="T">Generic Type</typeparam>
+        /// <param name="value">Value of type T</param>
+        /// <returns>Ok<T> struct</returns>
         public static Ok<T> Ok<T>(T value) => new Ok<T>(value);
 
+        /// <summary>
+        /// Creates an Err
+        /// </summary>
+        /// <param name="value">An IEnumerable of Exception</param>
+        /// <returns>Err struct</returns>
         public static Err Err(IEnumerable<Exception> value) => new Err(value);
 
+        /// <summary>
+        /// Creates an Err receiving a single Exception instead of an IEnumerable<Exception>
+        /// </summary>
+        /// <param name="value">Exception object</param>
+        /// <returns>Err struct</returns>
         public static Err ErrAsIEnumerable(Exception value) => new Err(new[] { value } as IEnumerable<Exception>);
 
+        /// <summary>
+        /// Creates an Err<T>
+        /// </summary>
+        /// <typeparam name="T">Generic Type</typeparam>
+        /// <param name="value">Value of type T</param>
+        /// <returns>Err<T> struct</returns>
         public static Err<T> Err<T>(T value) => new Err<T>(value);
 
         public static implicit operator Resolved(Ok value)
@@ -170,6 +236,13 @@ namespace MonadicResponseHandler
 
         public Resolved(Err err) : base(err) { }
 
+        /// <summary>
+        /// Execute one of the two functions provided based on the value stored and return a value of type T
+        /// </summary>
+        /// <typeparam name="T">The return type for both functions</typeparam>
+        /// <param name="Ok">Function to be executed if the value stored is an Ok that receives its stored vale and returns a value of type T</param>
+        /// <param name="Err">Function to be executed if the value stored is an Err that receives its stored value and returns a value of type T</param>
+        /// <returns>A value of type T</returns>
         public T Match<T>(Func<OkType, T> Ok, Func<IEnumerable<Exception>, T> Err)
         {
             switch (Type)
@@ -193,6 +266,12 @@ namespace MonadicResponseHandler
             }
         }
 
+        /// <summary>
+        /// Execute a function that returns a Resolved value if the stored value is an Ok, otherwise execute a pre defined behavior
+        /// </summary>
+        /// <param name="Ok">Function to be executed if the value stored is an Ok that receives its stored value and returns a Resolved</param>
+        /// <param name="Err">A pre defined behaviors to occur if the stored value is an Err</param>
+        /// <returns>Resolved value</returns>
         public Resolved Match(Func<OkType, Resolved> Ok, Behavior Err)
         {
             switch (Type)
@@ -214,6 +293,12 @@ namespace MonadicResponseHandler
             }
         }
 
+        /// <summary>
+        /// Execute a function that returns a Resolved&lt;OkType&gt; value if the stored value is an Ok, otherwise execute a pre defined behavior
+        /// </summary>
+        /// <param name="Ok">Function to be executed if the value stored is an Ok that receives its stored value and returns a Resolved&lt;OkType&gt;</param>
+        /// <param name="Err">A pre defined behaviors to occur if the stored value is an Err</param>
+        /// <returns>Resolved&lt;T&gt; value</returns>
         public Resolved<OkType> Match(Func<OkType, Resolved<OkType>> Ok, Behavior Err)
         {
             switch (Type)
@@ -235,6 +320,13 @@ namespace MonadicResponseHandler
             }
         }
 
+        /// <summary>
+        /// Execute a function that returns a Resolved&lt;T&gt; value if the stored value is an Ok, otherwise execute a pre defined behavior.
+        /// </summary>
+        /// <typeparam name="T">Generic Type for OkType in Resolved</typeparam>
+        /// <param name="Ok">Function to be executed if the value stored is an Ok that receives its stored value and returns a Resolved&lt;T&gt;</param>
+        /// <param name="Err">A pre defined behaviors to occur if the stored value is an Err</param>
+        /// <returns>Resolved&lt;T&gt; value</returns>
         public Resolved<T> Match<T>(Func<OkType, Resolved<T>> Ok, Behavior Err)
         {
             switch (Type)
@@ -256,6 +348,11 @@ namespace MonadicResponseHandler
             }
         }
 
+        /// <summary>
+        /// Execute one of the two functions provided based on the value stored
+        /// </summary>
+        /// <param name="Ok">Function to be executed if the value stored is an Ok that receives its stored value</param>
+        /// <param name="Err">Function to be executed if the value stored is an Err that receives its stored value</param>
         public void Match(Action<OkType> Ok, Action<IEnumerable<Exception>> Err)
         {
             switch (Type)
@@ -281,6 +378,10 @@ namespace MonadicResponseHandler
             }
         }
 
+        /// <summary>
+        /// Try to return the stored value in an Ok struct. If it is an Err, an Exception is throwed
+        /// </summary>
+        /// <returns>Value of type OkType</returns>
         public OkType Unwrap()
         {
             switch (Type)
@@ -314,6 +415,13 @@ namespace MonadicResponseHandler
 
         public Resolved(Err<ErrType> err) : base(err) { }
 
+        /// <summary>
+        /// Execute one of the two functions provided based on the value stored and return a value of type T
+        /// </summary>
+        /// <typeparam name="T">The return type for both functions</typeparam>
+        /// <param name="Ok">Function to be executed if the value stored is an Ok that receives its stored vale and returns a value of type T</param>
+        /// <param name="Err">Function to be executed if the value stored is an Err that receives its stored value and returns a value of type T</param>
+        /// <returns>A value of type T</returns>
         public T Match<T>(Func<OkType, T> Ok, Func<ErrType, T> Err)
         {
             switch (Type)
@@ -337,6 +445,12 @@ namespace MonadicResponseHandler
             }
         }
 
+        /// <summary>
+        /// Execute a function that returns a Resolved&lt;OkType, ErrType&gt; value if the stored value is an Ok, otherwise execute a pre defined behavior
+        /// </summary>
+        /// <param name="Ok">Function to be executed if the value stored is an Ok that receives its stored value and returns a Resolved&lt;OkType, ErrType&gt;</param>
+        /// <param name="Err">A pre defined behavior to occur if the stored value is an Err</param>
+        /// <returns>Resolved&lt;OkType, ErrType&gt; value</returns>
         public Resolved<OkType, ErrType> Match(Func<OkType, Resolved<OkType, ErrType>> Ok, Behavior Err)
         {
             switch (Type)
@@ -358,6 +472,13 @@ namespace MonadicResponseHandler
             }
         }
 
+        /// <summary>
+        /// Execute a function that returns a Resolved&lt;T, ErrType&gt; value if the stored value is an Ok, otherwise execute a pre defined behavior
+        /// </summary>
+        /// <typeparam name="T">Generic Type</typeparam>
+        /// <param name="Ok">Function to be executed if the value stored is an Ok that receives its stored value and returns a Resolved&lt;T, ErrType&gt;</param>
+        /// <param name="Err">A pre defined behavior to occur if the stored value is an Err</param>
+        /// <returns>Resolved&lt;T, ErrType&gt; value</returns>
         public Resolved<T, ErrType> Match<T>(Func<OkType, Resolved<T, ErrType>> Ok, Behavior Err)
         {
             switch (Type)
@@ -379,6 +500,11 @@ namespace MonadicResponseHandler
             }
         }
 
+        /// <summary>
+        /// Execute one of the two functions provided based on the value stored
+        /// </summary>
+        /// <param name="Ok">Function to be executed if the value stored is an Ok that receives its stored value</param>
+        /// <param name="Err">Function to be executed if the value stored is an Err that receives its stored value</param>
         public void Match(Action<OkType> Ok, Action<ErrType> Err)
         {
             switch (Type)
@@ -404,6 +530,10 @@ namespace MonadicResponseHandler
             }
         }
 
+        /// <summary>
+        /// Try to return the stored value in an Ok struct. If it is an Err, an Exception is throwed
+        /// </summary>
+        /// <returns>Value of type OkType</returns>
         public OkType Unwrap()
         {
             switch (Type)
